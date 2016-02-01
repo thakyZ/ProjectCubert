@@ -7,6 +7,8 @@ public class LevelTransistion : MonoBehaviour
 {
 	private Image UIImage;
 
+	public int ToLevel;
+
 	public float FadeSpeed = 0.8f;
 
 	public int DrawDepth = -1000;
@@ -30,8 +32,6 @@ public class LevelTransistion : MonoBehaviour
 		Alpha = Mathf.Clamp01(Alpha);
 
 		UIImage.color = new Color(0, 0, 0, Alpha);
-
-		Debug.Log(FadeTime);
 	}
 
 	public float BeginFade(int Direction)
@@ -50,11 +50,12 @@ public class LevelTransistion : MonoBehaviour
 		FadeTime = BeginFade(1);
 		yield return new WaitForSeconds(FadeTime);
 		FadeTime = 0;
-		SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+		SceneManager.LoadScene(ToLevel);
 	}
 
-	public void OnTestLevelTransition()
+	public void OnTestLevelTransition(int level)
 	{
+		ToLevel = level;
 		StartCoroutine(ChangeLevel());
 	}
 }
