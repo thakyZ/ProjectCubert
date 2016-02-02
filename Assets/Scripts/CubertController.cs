@@ -19,6 +19,10 @@ public class CubertController : MonoBehaviour {
     float ups;
     float sides;
 
+    bool oilyWall;
+    bool normalWall;
+    bool stickyWall;
+
     void Start ()
     {
         jmpForce = JumpForce;
@@ -38,10 +42,14 @@ public class CubertController : MonoBehaviour {
         var MousePosition = Input.mousePosition;
         var PlayerPosition = Camera.main.WorldToScreenPoint(transform.position);
         
+        if (stickyWall)
+        {
+            cubert.GetComponent<Rigidbody2D>().velocity = new Vector2(0, 0);
+        }
 
         #region ups
         //Creates a float based on the displacement between the player and the mouses y positions. Used for launching the player upwards
-        ups = (MousePosition.y / 10) - PlayerPosition.y / 10;
+        ups = ((MousePosition.y / 10) - PlayerPosition.y / 10);
 
         if (ups > 9)
         {
@@ -59,11 +67,11 @@ public class CubertController : MonoBehaviour {
         
         if (MousePosition.x < PlayerPosition.x)
         {
-            sides = Mathf.Abs((MousePosition.x / 6) - PlayerPosition.x / 6);
+            sides = (Mathf.Abs((MousePosition.x / 10) - PlayerPosition.x / 10));
         }
         else if (MousePosition.x > PlayerPosition.x)
         {
-            sides = (MousePosition.x / 6) - PlayerPosition.x / 6;
+            sides = ((MousePosition.x / 10) - PlayerPosition.x / 10);
         }
 
         if (sides > 7)
@@ -87,11 +95,12 @@ public class CubertController : MonoBehaviour {
             flip = 1;
         }
         #endregion
-
+        
         #region jump
         //Launches the player based on a left mouse click.
         if (Input.GetButtonDown("Fire1") && onGround)
         {
+            stickyWall = false;
             Debug.Log("playx: " + PlayerPosition.x + " playy: " + PlayerPosition.y + " mousex: " + Input.mousePosition.x + " mousey: " + Input.mousePosition.y + " ups: " + ups + " sides: " + sides);
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
@@ -122,15 +131,54 @@ public class CubertController : MonoBehaviour {
 
     void OnCollisionEnter2D(Collision2D col)
     {
-        if (col.collider.tag == "NormalWall")
+        if (col.collider.tag == "OilyWall")
         {
             onGround = true;
-            
             JumpKey = false;
             jmpDuration = 0;
             jmpForce = JumpForce;
 
             //Debug.Log("OnGround");
         }
+        if (col.collider.tag == "NormalWall")
+        {
+            onGround = true;
+            JumpKey = false;
+            jmpDuration = 0;
+            jmpForce = JumpForce;
+
+            //Debug.Log("OnGround");
+        }
+        if (col.collider.tag == "StickyWall")
+        {
+            onGround = true;
+            JumpKey = false;
+            jmpDuration = 0;
+            jmpForce = JumpForce;
+
+            stickyWall = true;
+
+
+            //Debug.Log("OnGround");
+        }
     }
+
+    void OnCollisionStay2D(Collision2D col)
+    {
+
+        if (col.collider.tag == "StickyWall")
+        {
+            onGround = true;
+            JumpKey = false;
+            jmpDuration = 0;
+            jmpForce = JumpForce;
+
+            stickyWall = true;
+
+
+            //Debug.Log("OnGround");
+        }
+    }
+
+       
 }
