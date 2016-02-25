@@ -14,7 +14,7 @@ public class CubertController : MonoBehaviour
     Rigidbody2D rig2d;
     //Checks if player is on the ground
     public bool onGround;
-    
+
     public float ups;
     public float sides;
 
