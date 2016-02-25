@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
-using System.Collections;
 
-public class CubertController : MonoBehaviour {
+public class CubertController : MonoBehaviour
+{
 
     public GameObject cubert;
 
@@ -14,94 +14,109 @@ public class CubertController : MonoBehaviour {
     Rigidbody2D rig2d;
     //Checks if player is on the ground
     public bool onGround;
+    
+    public float ups;
+    public float sides;
 
-    float flip = 1;
-    float ups;
-    float sides;
+    float angle;
+    float angleInDegrees;
+    Vector2 distPos;
+    [HideInInspector]
+    public float distMag;
 
     bool oilyWall;
     bool normalWall;
     bool stickyWall;
 
-    void Start ()
+    void Start()
     {
         jmpForce = JumpForce;
     }
-	
-    void Update ()
+
+    void Update()
     {
 
         //Debug.Log("JumpKey: " + JumpKey + " OnGround: " + onGround);
     }
 
-	// Update is called once per frame
-	void FixedUpdate ()
+    // Update is called once per frame
+    void FixedUpdate()
     {
         JumpKey = false;
 
+        Debug.Log("distMag: " + distMag + ", angle: " + angle + ", angleInDegrees: " + angleInDegrees + ", ups: " + ups + ", sides: " + sides);
+
         var MousePosition = Input.mousePosition;
         var PlayerPosition = Camera.main.WorldToScreenPoint(transform.position);
-        
+
+        distPos = MousePosition - PlayerPosition;
+        distMag = Vector3.Magnitude(distPos);
+
+        angle = Mathf.Atan2(distPos.y, distPos.x);
+
         if (stickyWall)
         {
             cubert.GetComponent<Rigidbody2D>().velocity = new Vector2(0, 0);
         }
+        if (!onGround)
+        {
+            stickyWall = false;
+        }
 
         #region ups
         //Creates a float based on the displacement between the player and the mouses y positions. Used for launching the player upwards
-        ups = ((MousePosition.y / 10) - PlayerPosition.y / 10);
+        //ups = ((MousePosition.y / 8) - PlayerPosition.y / 8);
 
-        if (ups > 9)
+        ups = (Mathf.Sin(angle) * distMag) / 10;
+
+        if (ups > 15f)
         {
-            ups = 9;
+            ups = 15f;
         }
 
         if (ups < 1)
         {
-            ups = 0.5f;
+            ups = 1f;
         }
         #endregion
 
         #region sides
         //similar to the ups float. Find difference in x between the players and mouses x position.
-        
-        if (MousePosition.x < PlayerPosition.x)
+        /*if (MousePosition.x < PlayerPosition.x)
         {
-            sides = (Mathf.Abs((MousePosition.x / 10) - PlayerPosition.x / 10));
+            sides = (Mathf.Abs((MousePosition.x / 15) - PlayerPosition.x / 15));
         }
         else if (MousePosition.x > PlayerPosition.x)
         {
-            sides = ((MousePosition.x / 10) - PlayerPosition.x / 10);
-        }
+            sides = ((MousePosition.x / 15) - PlayerPosition.x / 15);
+        }*/
 
-        if (sides > 7)
+        sides = (Mathf.Cos(angle) * distMag) / 13;
+
+        if (sides > 10)
         {
-            sides = 7;
-        }
-        if (sides < 0.5)
-        {
-            sides = 0;
+            sides = 10;
         }
         #endregion
 
         #region flip
         //Checks the mouses position versus the player, so we can use flip to decide which direction we launch the player
-        if (MousePosition.x < PlayerPosition.x)
+        /*if (MousePosition.x < PlayerPosition.x)
         {
             flip = -1;
         }
         else if (MousePosition.x > PlayerPosition.x)
         {
             flip = 1;
-        }
+        }*/
         #endregion
-        
+
         #region jump
         //Launches the player based on a left mouse click.
         if (Input.GetButtonDown("Fire1") && onGround)
         {
             stickyWall = false;
-            Debug.Log("playx: " + PlayerPosition.x + " playy: " + PlayerPosition.y + " mousex: " + Input.mousePosition.x + " mousey: " + Input.mousePosition.y + " ups: " + ups + " sides: " + sides);
+            Debug.Log("playx: " + PlayerPosition.x + " playy: " + PlayerPosition.y + " mousex: " + Input.mousePosition.x + " mousey: " + Input.mousePosition.y + " ups: " + ups + " sides: " + sides + " OnGround: " + onGround + " angle: " + angle);
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
             if (Physics.Raycast(ray))
@@ -113,7 +128,7 @@ public class CubertController : MonoBehaviour {
 
                     if (jmpDuration < jumpDuration)
                     {
-                        cubert.GetComponent<Rigidbody2D>().velocity = new Vector2(sides * flip, ups); //Uses sides and ups to launch player
+                        cubert.GetComponent<Rigidbody2D>().velocity = new Vector2(sides, ups); //Uses sides and ups to launch player
                         onGround = false;
                         JumpKey = true;
                     }
@@ -138,6 +153,8 @@ public class CubertController : MonoBehaviour {
             jmpDuration = 0;
             jmpForce = JumpForce;
 
+            stickyWall = false;
+
             //Debug.Log("OnGround");
         }
         if (col.collider.tag == "NormalWall")
@@ -146,6 +163,8 @@ public class CubertController : MonoBehaviour {
             JumpKey = false;
             jmpDuration = 0;
             jmpForce = JumpForce;
+
+            stickyWall = false;
 
             //Debug.Log("OnGround");
         }
@@ -178,7 +197,70 @@ public class CubertController : MonoBehaviour {
 
             //Debug.Log("OnGround");
         }
+
+        if (col.collider.tag == "OilyWall")
+        {
+            onGround = true;
+            JumpKey = false;
+            jmpDuration = 0;
+            jmpForce = JumpForce;
+
+            stickyWall = false;
+
+            //Debug.Log("OnGround");
+        }
+
+        if (col.collider.tag == "NormalWall")
+        {
+            onGround = true;
+            JumpKey = false;
+            jmpDuration = 0;
+            jmpForce = JumpForce;
+
+            stickyWall = false;
+
+            //Debug.Log("OnGround");
+        }
     }
 
-       
+    void OnCollisionExit2D(Collision2D col)
+    {
+
+        if (col.collider.tag == "StickyWall")
+        {
+            onGround = false;
+            JumpKey = true;
+            jmpDuration = 0;
+            jmpForce = JumpForce;
+
+            stickyWall = false;
+
+
+            //Debug.Log("OnGround");
+        }
+        if (col.collider.tag == "OilyWall")
+        {
+            onGround = false;
+            JumpKey = true;
+            jmpDuration = 0;
+            jmpForce = JumpForce;
+
+            stickyWall = false;
+
+            //Debug.Log("OnGround");
+        }
+        if (col.collider.tag == "NormalWall")
+        {
+            onGround = false;
+            JumpKey = true;
+            jmpDuration = 0;
+            jmpForce = JumpForce;
+
+            stickyWall = false;
+
+            //Debug.Log("OnGround");
+        }
+    }
+
+
 }
