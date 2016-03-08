@@ -1,8 +1,8 @@
-﻿using UnityEngine;
-using UnityEngine.UI;
+﻿using System;
 using System.Collections;
+using UnityEngine;
 using UnityEngine.SceneManagement;
-using System;
+using UnityEngine.UI;
 
 public class Fade : MonoBehaviour
 {
@@ -46,22 +46,32 @@ public class Fade : MonoBehaviour
         BeginFade(-1);
     }
 
-    IEnumerator ChangeLevel()
+    IEnumerator ChangeLevel(int level)
     {
         FadeTime = BeginFade(1);
         yield return new WaitForSeconds(FadeTime);
         FadeTime = 0;
-        SceneManager.LoadScene(ToLevel);
+        SceneManager.LoadScene(level);
+    }
+
+    IEnumerator ResetLevel()
+    {
+        FadeTime = BeginFade(1);
+        yield return new WaitForSeconds(FadeTime);
+        FadeTime = 0;
+        BeginFade(-1);
     }
 
     public void FadeToLevel(int level)
     {
         if (level == -1)
         {
-            level = SceneManager.GetActiveScene().buildIndex;
+            StartCoroutine(ResetLevel());
         }
-        ToLevel = level;
-        StartCoroutine(ChangeLevel());
+        else
+        {
+            StartCoroutine(ChangeLevel(level));
+        }
     }
 
     public void FadeToLevel(string level)
@@ -76,8 +86,7 @@ public class Fade : MonoBehaviour
         {
             levelIndex -= Convert.ToInt32(level.Substring(1));
         }
-        ToLevel = levelIndex;
 
-        StartCoroutine(ChangeLevel());
+        StartCoroutine(ChangeLevel(levelIndex));
     }
 }

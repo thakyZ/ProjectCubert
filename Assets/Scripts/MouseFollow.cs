@@ -14,6 +14,14 @@ public class MouseFollow : MonoBehaviour
 
     public float temp = 100;
 
+    public float angle;
+
+    public Vector3 targetToMouseDir;
+
+    public Vector3 targetScreenPos;
+
+    public Vector3 mouseWorldPos;
+
     void Start()
     {
         controller = GetComponentInParent<CubertController>();
@@ -22,16 +30,16 @@ public class MouseFollow : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        Vector3 targetScreenPos = Camera.main.WorldToScreenPoint(cubert.position);
+        targetScreenPos = Camera.main.WorldToScreenPoint(cubert.position);
         targetScreenPos.z = 0;
-        Vector3 mouseWorldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        mouseWorldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         mouseWorldPos.z = 0;
-        Vector3 targetToMouseDir = Input.mousePosition - targetScreenPos;
+        targetToMouseDir = Input.mousePosition - targetScreenPos;
         Vector3 mouseToTargetDir = cubert.position - mouseWorldPos;
         Vector3 targetToMe = transform.position - cubert.position;
         targetToMe.z = 0;
 
-        var angle = Mathf.Atan2(targetToMouseDir.y, targetToMouseDir.x) * Mathf.Rad2Deg;
+        angle = Mathf.Atan2(targetToMouseDir.y, targetToMouseDir.x) * Mathf.Rad2Deg;
         transform.rotation = Quaternion.Euler(new Vector3(0, 0, angle));
 
         float scale = Vector3.Magnitude(targetToMouseDir);
@@ -51,5 +59,11 @@ public class MouseFollow : MonoBehaviour
     {
         Gizmos.color = new Color(0, 1, 0);
         Gizmos.DrawLine(cubert.transform.position, cubert.transform.position + (Vector3)cubert.GetComponent<Rigidbody2D>().velocity / 2);
+       // Gizmos.color = new Color(1, 0, 0);
+       // Gizmos.DrawSphere(targetToMouseDir, 1);
+       // Gizmos.color = new Color(1, 1, 0);
+        //Gizmos.DrawSphere(targetScreenPos, 1);
+       // Gizmos.color = new Color(0, 0, 1);
+       // Gizmos.DrawSphere(mouseWorldPos, 1);
     }
 }

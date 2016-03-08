@@ -4,6 +4,8 @@ using UnityEngine.SceneManagement;
 
 public class CubertHealth : MonoBehaviour
 {
+    public GameObject PlayerOrigin;
+
 
     // Use this for initialization
     void Start()
@@ -21,15 +23,18 @@ public class CubertHealth : MonoBehaviour
     {
         if (col.gameObject.tag == ("Enemy"))
         {
-            Destroy(gameObject);
-            StartCoroutine(Wait(4));
-            FindObjectOfType<Fade>().FadeToLevel(-1);
+            StartCoroutine(WaitDeath(0));
         }
     }
 
-    IEnumerator Wait(float seconds)
+    IEnumerator WaitDeath(float seconds)
     {
-        yield return new WaitForSeconds(seconds);
+        FindObjectOfType<Fade>().FadeToLevel(-1);
+        transform.localPosition = new Vector3(transform.localPosition.x, transform.localPosition.y, 5);
+        GetComponent<Rigidbody2D>().constraints = RigidbodyConstraints2D.FreezeAll;
+        yield return new WaitForSeconds(FindObjectOfType<Fade>().FadeTime);
+        GetComponent<Rigidbody2D>().constraints = RigidbodyConstraints2D.FreezeRotation;
+        transform.localPosition = Vector3.zero;
     }
 
     void OnLevelWasLoaded()
@@ -41,15 +46,25 @@ public class CubertHealth : MonoBehaviour
     {
         if (col.gameObject.tag == ("Goal"))
         {
-            PlayerPrefs.SetInt("Unlocked", SceneManager.GetActiveScene().buildIndex - 1);
-            StartCoroutine(Wait(4));
+            if (SceneManager.GetActiveScene().buildIndex >= 2)
+            {
+                PlayerPrefs.SetInt("Unlocked", SceneManager.GetActiveScene().buildIndex);
+            }
+            Debug.Log("Int = " + PlayerPrefs.GetInt("Unlocked") + " BuildIndex = " + SceneManager.GetActiveScene().buildIndex);
             FindObjectOfType<Fade>().FadeToLevel("+1");
+        }
+        if (col.gameObject.tag == ("CheckPoint"))
+        {
+            PlayerOrigin.transform.position = new Vector3(col.gameObject.transform.position.x, col.gameObject.transform.position.y, 0);
+            transform.localPosition = new Vector3(0, 0, 0);
         }
         if (col.gameObject.tag == ("Enemy"))
         {
-            Destroy(gameObject);
-            StartCoroutine(Wait(4));
+            StartCoroutine(WaitDeath(10));
+            gameObject.SetActive(false);
             FindObjectOfType<Fade>().FadeToLevel(-1);
+            gameObject.SetActive(true);
+            transform.localPosition = new Vector3(0, 0, 0);
         }
     }
 }

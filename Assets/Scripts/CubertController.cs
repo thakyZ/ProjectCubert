@@ -14,12 +14,11 @@ public class CubertController : MonoBehaviour
     Rigidbody2D rig2d;
     //Checks if player is on the ground
     public bool onGround;
-
+    
     public float ups;
     public float sides;
 
     float angle;
-    float angleInDegrees;
     Vector2 distPos;
     [HideInInspector]
     public float distMag;
@@ -28,6 +27,8 @@ public class CubertController : MonoBehaviour
     bool normalWall;
     bool stickyWall;
 
+    bool jump;
+
     void Start()
     {
         jmpForce = JumpForce;
@@ -35,7 +36,10 @@ public class CubertController : MonoBehaviour
 
     void Update()
     {
-
+        if(Input.GetButtonDown("Fire1") && onGround)
+        {
+            jump = true;
+        }
         //Debug.Log("JumpKey: " + JumpKey + " OnGround: " + onGround);
     }
 
@@ -44,7 +48,7 @@ public class CubertController : MonoBehaviour
     {
         JumpKey = false;
 
-        Debug.Log("distMag: " + distMag + ", angle: " + angle + ", angleInDegrees: " + angleInDegrees + ", ups: " + ups + ", sides: " + sides);
+        //Debug.Log("distMag: " + distMag + ", angle: " + angle + ", ups: " + ups + ", sides: " + sides);
 
         var MousePosition = Input.mousePosition;
         var PlayerPosition = Camera.main.WorldToScreenPoint(transform.position);
@@ -97,6 +101,10 @@ public class CubertController : MonoBehaviour
         {
             sides = 10;
         }
+        if (sides < -10)
+        {
+            sides = -10;
+        }
         #endregion
 
         #region flip
@@ -113,7 +121,7 @@ public class CubertController : MonoBehaviour
 
         #region jump
         //Launches the player based on a left mouse click.
-        if (Input.GetButtonDown("Fire1") && onGround)
+        if (jump && onGround)
         {
             stickyWall = false;
             Debug.Log("playx: " + PlayerPosition.x + " playy: " + PlayerPosition.y + " mousex: " + Input.mousePosition.x + " mousey: " + Input.mousePosition.y + " ups: " + ups + " sides: " + sides + " OnGround: " + onGround + " angle: " + angle);
@@ -131,6 +139,7 @@ public class CubertController : MonoBehaviour
                         cubert.GetComponent<Rigidbody2D>().velocity = new Vector2(sides, ups); //Uses sides and ups to launch player
                         onGround = false;
                         JumpKey = true;
+                        jump = false;
                     }
                     else
                     {
