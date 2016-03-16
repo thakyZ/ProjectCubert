@@ -6,6 +6,8 @@ public class CubertHealth : MonoBehaviour
 {
     public GameObject PlayerOrigin;
 
+    public GameObject LastCheckPoint;
+
 
     // Use this for initialization
     void Start()
@@ -33,8 +35,23 @@ public class CubertHealth : MonoBehaviour
         transform.localPosition = new Vector3(transform.localPosition.x, transform.localPosition.y, 5);
         GetComponent<Rigidbody2D>().constraints = RigidbodyConstraints2D.FreezeAll;
         yield return new WaitForSeconds(FindObjectOfType<Fade>().FadeTime);
+        foreach (GameObject go in GameObject.FindGameObjectsWithTag("Enemy"))
+        {
+            if (go.GetComponent<SpiderMove>() != null)
+            {
+                go.GetComponent<SpiderMove>().Reset();
+            }
+        }
         GetComponent<Rigidbody2D>().constraints = RigidbodyConstraints2D.FreezeRotation;
-        transform.localPosition = Vector3.zero;
+        if (LastCheckPoint != null)
+        {
+            PlayerOrigin.transform.position = LastCheckPoint.transform.position;
+            transform.localPosition = Vector3.zero;
+        }
+        else
+        {
+            transform.localPosition = Vector3.zero;
+        }
     }
 
     void OnLevelWasLoaded()
@@ -55,8 +72,7 @@ public class CubertHealth : MonoBehaviour
         }
         if (col.gameObject.tag == ("CheckPoint"))
         {
-            PlayerOrigin.transform.position = new Vector3(col.gameObject.transform.position.x, col.gameObject.transform.position.y, 0);
-            transform.localPosition = new Vector3(0, 0, 0);
+            LastCheckPoint = col.gameObject;
         }
         if (col.gameObject.tag == ("Enemy"))
         {

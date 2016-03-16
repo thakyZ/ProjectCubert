@@ -38,6 +38,13 @@ public class SpiderMove : MonoBehaviour
     private bool hitwallcornerdownleft;
     private bool hitwallcornerdownright;
 
+    private Vector3 startingPosition;
+
+    void Awake()
+    {
+        startingPosition = transform.position;
+    }
+
     void Start()
     {
         velocity = new Vector2(-1, 0);
@@ -183,9 +190,14 @@ public class SpiderMove : MonoBehaviour
         transform.position += (Vector3)velocity * speed * Time.deltaTime;
     }
 
-    public void OnDrawGizmos()
+    void OnDrawGizmos()
     {
         Gizmos.color = Color.green;
         Gizmos.DrawLine(transform.position, transform.position + (Vector3)velocity);
+    }
+
+    public void Reset()
+    {
+        transform.position = startingPosition;
     }
 }
