@@ -19,6 +19,7 @@ public class CubertController : MonoBehaviour
     public float sides;
 
     float angle;
+    float angleInDegrees;
     Vector2 distPos;
     [HideInInspector]
     public float distMag;
@@ -26,6 +27,8 @@ public class CubertController : MonoBehaviour
     bool oilyWall;
     bool normalWall;
     bool stickyWall;
+
+    HingeJoint2D tempHinge;
 
     bool jump;
 
@@ -48,7 +51,7 @@ public class CubertController : MonoBehaviour
     {
         JumpKey = false;
 
-        //Debug.Log("distMag: " + distMag + ", angle: " + angle + ", ups: " + ups + ", sides: " + sides);
+        //Debug.Log("distMag: " + distMag + ", angle: " + angle + ", angleInDegrees: " + angleInDegrees + ", ups: " + ups + ", sides: " + sides);
 
         var MousePosition = Input.mousePosition;
         var PlayerPosition = Camera.main.WorldToScreenPoint(transform.position);
@@ -58,30 +61,31 @@ public class CubertController : MonoBehaviour
 
         angle = Mathf.Atan2(distPos.y, distPos.x);
 
-        if (stickyWall)
-        {
-            cubert.GetComponent<Rigidbody2D>().velocity = new Vector2(0, 0);
-        }
         if (!onGround)
         {
             stickyWall = false;
         }
 
-        #region ups
+         #region ups
         //Creates a float based on the displacement between the player and the mouses y positions. Used for launching the player upwards
         //ups = ((MousePosition.y / 8) - PlayerPosition.y / 8);
 
-        ups = (Mathf.Sin(angle) * distMag) / 10;
+        ups = (Mathf.Sin(angle) * distMag) / 11.7f;
 
         if (ups > 15f)
         {
             ups = 15f;
         }
 
-        if (ups < 1)
+        if (ups < 1 && ups > 0)
         {
             ups = 1f;
         }
+        if (ups < 0)
+        {
+            ups = -1f;
+        }
+
         #endregion
 
         #region sides
@@ -95,15 +99,24 @@ public class CubertController : MonoBehaviour
             sides = ((MousePosition.x / 15) - PlayerPosition.x / 15);
         }*/
 
-        sides = (Mathf.Cos(angle) * distMag) / 13;
+        sides = (Mathf.Cos(angle) * distMag) / 14.625f;
 
-        if (sides > 10)
+        if (sides > 12)
         {
-            sides = 10;
+            sides = 12;
         }
-        if (sides < -10)
+        if (sides < -12)
         {
-            sides = -10;
+            sides = -12;
+        }
+
+        if (sides < 1 && sides > 0)
+        {
+            sides = 0;
+        }
+        if (sides > -1 && sides < 0)
+        {
+            sides = 0;
         }
         #endregion
 
@@ -177,15 +190,30 @@ public class CubertController : MonoBehaviour
 
             //Debug.Log("OnGround");
         }
-        if (col.collider.tag == "StickyWall")
+        if (col.collider.tag == "Untagged")
         {
             onGround = true;
             JumpKey = false;
             jmpDuration = 0;
             jmpForce = JumpForce;
 
-            stickyWall = true;
+            stickyWall = false;
 
+            //Debug.Log("OnGround");
+        }
+        if (col.collider.tag == "FlimsyWall")
+        {
+            onGround = true;
+            JumpKey = false;
+            jmpDuration = 0;
+            jmpForce = JumpForce;
+
+
+           /* foreach (ContactPoint2D c in col.contacts)
+            {
+                tempHinge = col.gameObject.AddComponent<HingeJoint2D>();
+                tempHinge.connectedBody = gameObject.GetComponent<Rigidbody2D>();
+            }*/
 
             //Debug.Log("OnGround");
         }
@@ -194,15 +222,13 @@ public class CubertController : MonoBehaviour
     void OnCollisionStay2D(Collision2D col)
     {
 
-        if (col.collider.tag == "StickyWall")
+        if (col.collider.tag == "FlimsyWall")
         {
             onGround = true;
             JumpKey = false;
             jmpDuration = 0;
             jmpForce = JumpForce;
-
-            stickyWall = true;
-
+            
 
             //Debug.Log("OnGround");
         }
@@ -235,7 +261,7 @@ public class CubertController : MonoBehaviour
     void OnCollisionExit2D(Collision2D col)
     {
 
-        if (col.collider.tag == "StickyWall")
+        if (col.collider.tag == "FlimsyWall")
         {
             onGround = false;
             JumpKey = true;
